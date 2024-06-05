@@ -26,7 +26,7 @@ const hasOwnerPermission = (permissions:any) => {
   
             if (hasOwnerPermission(permissions)) {
   
-                    // const  = await drive.permissions.create({
+                    // const response   = await drive.permissions.create({
                     //     fileId: fileId,
                     //     requestBody: {
                     //         role: 'reader',

@@ -8,6 +8,7 @@ const DriveCompo = () => {
     
     const [accessToken,setAccessToken] = useState("")
     const [fileId, setFileId] = useState("");
+    const [loading, setLoading] = useState(false);
     const [openPicker, authResponse] = UseDrivePicker();  
 
     const ClientKey:any =  process?.env?.NEXT_PUBLIC_CLIENT_KEY;
@@ -56,7 +57,7 @@ const DriveCompo = () => {
       console.log("accessToken---",accessToken,"-------fileId",fileId)
       const token = accessToken;
       const email = "webexpert889@gmail.com";
-
+      setLoading(true)
       const response = await fetch('/api/share-file', {
           method: 'POST',
           headers: {
@@ -64,6 +65,7 @@ const DriveCompo = () => {
           },
           body: JSON.stringify({ fileId, token ,email }),
       });
+     
 
       const data = await response.json()
       if(data.status == 500){
@@ -75,6 +77,7 @@ const DriveCompo = () => {
         setAccessToken("")
         toast.success(data.message)
       }
+      setLoading(false)
    },[])
 
 
@@ -87,7 +90,7 @@ const DriveCompo = () => {
   return (
     <div>
         <ToastContainer />
-        <button onClick={() => handleOpenPicker()} className='text-white bg-blue-700 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 mt-9'>Google Drive</button>
+        <button onClick={() => handleOpenPicker()} className='text-white bg-blue-700 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 mt-9'>Google Drive { loading ? "  loading...." : ""}</button>
 
     </div>
   )
