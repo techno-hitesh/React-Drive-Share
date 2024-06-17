@@ -50,7 +50,6 @@ const DriveCompo = () => {
     const newTokenGenerate = async(token:any) =>{
       const resp = await refreshToken(ClientKey,ClientSecret,token);
       setAccessToken(resp)
-      console.log("---- refreshToken ----",resp)
     }
 
     useEffect(()=>{
@@ -58,14 +57,9 @@ const DriveCompo = () => {
         console.log("token--",authResponse)
         setAccessToken(authResponse.access_token)
 
-        // setTimeout(()=>{
-        //   newToken(authResponse.access_token)
-        // },2000)
         setInterval(()=>{
-          console.log("---- refreshToken setInterval ----")
-          newTokenGenerate(authResponse.access_token)
-          
-        }, (3599 - 3300) * 1000);
+          newTokenGenerate(authResponse.access_token)          
+        }, 3000 * 1000);
       }
     },[authResponse])   
 
@@ -82,7 +76,6 @@ const DriveCompo = () => {
           },
           body: JSON.stringify({ fileId, token ,email }),
       });
-     
 
       const data = await response.json()
       if(data.status == 500){

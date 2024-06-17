@@ -26,7 +26,7 @@ export async function refreshToken(ClientKey,ClientSecret, token) {
       }
   
       const newAccessToken = data.access_token;
-      console.log('New Access Token:', newAccessToken);
+      console.log('@@@@@@@@@ refreshToken:', newAccessToken);
       return newAccessToken
       // Use the new access token
   
