@@ -3,6 +3,7 @@ import React,{useCallback, useEffect,useState} from 'react';
 import UseDrivePicker from 'react-google-drive-picker'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {refreshToken} from "@/app/api/services/Api_service" 
 
 const DriveCompo = () => {
     
@@ -13,6 +14,7 @@ const DriveCompo = () => {
 
     const ClientKey:any =  process?.env?.NEXT_PUBLIC_CLIENT_KEY;
     const APIKey:any =  process?.env?.NEXT_PUBLIC_API_KEY;
+    const ClientSecret:any =  process?.env?.NEXT_PUBLIC_CLIENT_SECRET;
     const Token:any = process?.env?.NEXT_PUBLIC_TOKEN || "";
 
     const Scopes = ['https://www.googleapis.com/auth/drive',
@@ -27,7 +29,7 @@ const DriveCompo = () => {
         clientId:ClientKey,
         developerKey: APIKey,
         viewId: "DOCS",
-        // token: Token, // pass oauth token in case you already have one
+        token: accessToken, // pass oauth token in case you already have one
         showUploadView: true,
         showUploadFolders: true,
         supportDrives: true,
@@ -45,10 +47,25 @@ const DriveCompo = () => {
       })
     }
 
+    const newTokenGenerate = async(token:any) =>{
+      const resp = await refreshToken(ClientKey,ClientSecret,token);
+      setAccessToken(resp)
+      console.log("---- refreshToken ----",resp)
+    }
+
     useEffect(()=>{
       if (authResponse) {
         console.log("token--",authResponse)
         setAccessToken(authResponse.access_token)
+
+        // setTimeout(()=>{
+        //   newToken(authResponse.access_token)
+        // },2000)
+        setInterval(()=>{
+          console.log("---- refreshToken setInterval ----")
+          newTokenGenerate(authResponse.access_token)
+          
+        }, (3599 - 3300) * 1000);
       }
     },[authResponse])   
 
