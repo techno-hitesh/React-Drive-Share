@@ -1,5 +1,5 @@
 //Refresh Token Function
-export async function refreshToken(ClientKey,ClientSecret, token) {
+export const refreshToken = async (clientId, clientSecret, refreshToken) => {
     try {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -7,30 +7,74 @@ export async function refreshToken(ClientKey,ClientSecret, token) {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          client_id: ClientKey,
-          client_secret:ClientSecret,
-          refresh_token: token,
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken,
           grant_type: 'refresh_token'
         })
       });
   
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
       const data = await response.json();
-      
   
-      if (data.error) {
-        throw new Error(`API error! ${data.error}: ${data.error_description}`);
+      if (!response.ok || data.error) {
+        throw new Error(`Error: ${data.error}, Description: ${data.error_description}`);
       }
-  
-      const newAccessToken = data.access_token;
-      console.log('@@@@@@@@@ refreshToken:', newAccessToken);
-      return newAccessToken
-      // Use the new access token
-  
+
+      return data.access_token;
     } catch (error) {
       console.error('Error refreshing token:', error);
+      return null;
     }
-  }
+  };
+  
+
+
+  export const getFileMetadata = async (fileId, accessToken) => {
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType`;
+  
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error fetching file metadata: ${response.statusText}`);
+    }
+  
+    const metadata = await response.json();
+    return metadata;
+  };
+  
+
+
+  export const exportAndDownloadFile = async (fileId, accessToken, mimeType) => {
+    const exportMimeTypeMap = {
+        'application/vnd.google-apps.document': 'application/pdf',
+        'application/vnd.google-apps.spreadsheet': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.google-apps.presentation': 'application/pdf',
+      };
+  
+    const exportMimeType = exportMimeTypeMap[mimeType];
+    if (!exportMimeType) {
+      throw new Error('Unsupported Google Docs editor file type');
+    }
+  
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=${exportMimeType}`;
+  
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error exporting file: ${response.statusText}`);
+    }
+  
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    return { objectUrl, mimeType: exportMimeType };
+  };
+  
+  
